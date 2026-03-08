@@ -28,23 +28,20 @@ public class CarDAO extends DBContext {
 
             while (rs.next()) {
 
-                Car c = new Car(
-                        rs.getInt("CarID"),
-                        rs.getInt("CarTypeID"),
-                        rs.getDouble("PricePerDay"),
-                        rs.getString("Status")
-                );
-
+                Car c = new Car();
+                c.setCarID(rs.getInt("CarID"));
+                c.setCarTypeID(rs.getInt("CarTypeID"));
+                c.setPricePerDay(rs.getDouble("PricePerDay"));
+                c.setStatus(rs.getString("Status"));
                 list.add(c);
 
             }
 
         } catch (Exception e) {
-            e.printStackTrace();
+            System.out.println("Lỗi getAllCars: " + e.getMessage());
         }
 
         return list;
     }
-    
 
 }
