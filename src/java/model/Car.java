@@ -4,57 +4,63 @@
  */
 package model;
 
-/**
- *
- * @author ADMIN
- */
 public class Car {
 
-    private int carID;
-    private int carTypeID;
+    private int id;
+    private String name;
+    private String licensePlate;
     private double pricePerDay;
-    private String status;
+    private String status; // AVAILABLE, RENTED, MAINTENANCE
+    private CarType carType; // Chứa thông tin loại xe (seats)
 
     public Car() {
     }
 
-    public Car(int carID, int carTypeID, double pricePerDay, String status) {
-        this.carID = carID;
-        this.carTypeID = carTypeID;
-        this.pricePerDay = pricePerDay;
-        this.status = status;
+    public int getId() {
+        return id;
     }
 
-    public int getCarID() {
-        return carID;
+    public void setId(int id) {
+        this.id = id;
     }
 
-    public int getCarTypeID() {
-        return carTypeID;
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getLicensePlate() {
+        return licensePlate;
+    }
+
+    public void setLicensePlate(String licensePlate) {
+        this.licensePlate = licensePlate;
     }
 
     public double getPricePerDay() {
         return pricePerDay;
     }
 
-    public String getStatus() {
-        return status;
-    }
-
-    public void setCarID(int carID) {
-        this.carID = carID;
-    }
-
-    public void setCarTypeID(int carTypeID) {
-        this.carTypeID = carTypeID;
-    }
-
     public void setPricePerDay(double pricePerDay) {
         this.pricePerDay = pricePerDay;
+    }
+
+    public String getStatus() {
+        return status;
     }
 
     public void setStatus(String status) {
         this.status = status;
     }
 
+    public CarType getCarType() {
+        return carType;
+    }
+
+    public void setCarType(CarType carType) {
+        this.carType = carType;
+    }
 }

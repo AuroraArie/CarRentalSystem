@@ -5,21 +5,21 @@
 
 package controller;
 
-import dal.CarDAO;
+import dal.UserDAO;
 import java.io.IOException;
 import java.io.PrintWriter;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import java.util.List;
-import model.Car;
+import jakarta.servlet.http.HttpSession;
+import model.User;
 
 /**
  *
  * @author ADMIN
  */
-public class CarListServlet extends HttpServlet {
+public class LoginServlet extends HttpServlet {
    
     /** 
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code> methods.
@@ -36,10 +36,10 @@ public class CarListServlet extends HttpServlet {
             out.println("<!DOCTYPE html>");
             out.println("<html>");
             out.println("<head>");
-            out.println("<title>Servlet CarListServlet</title>");  
+            out.println("<title>Servlet LoginServlet</title>");  
             out.println("</head>");
             out.println("<body>");
-            out.println("<h1>Servlet CarListServlet at " + request.getContextPath () + "</h1>");
+            out.println("<h1>Servlet LoginServlet at " + request.getContextPath () + "</h1>");
             out.println("</body>");
             out.println("</html>");
         }
@@ -56,10 +56,7 @@ public class CarListServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
     throws ServletException, IOException {
-        CarDAO dao = new CarDAO();
-        List<Car> carList = dao.getAllCars();
-        request.setAttribute("carList", carList);
-        request.getRequestDispatcher("carList.jsp").forward(request, response);
+        processRequest(request, response);
     } 
 
     /** 
@@ -72,7 +69,43 @@ public class CarListServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
     throws ServletException, IOException {
-        processRequest(request, response);
+        // Set encoding để nhận tiếng Việt nếu có
+        request.setCharacterEncoding("UTF-8");
+        
+        String user = request.getParameter("username");
+        String pass = request.getParameter("password");
+        
+        UserDAO dao = new UserDAO();
+        User account = dao.login(user, pass);
+        
+        if (account != null) {
+            // Đăng nhập thành công -> Lưu vào Session
+            HttpSession session = request.getSession();
+            session.setAttribute("user", account);
+            
+            // Điều hướng dựa trên Role ID (1: Admin, 2: Manager, 3: Staff, 4: Driver, 5: Customer)
+            switch (account.getRoleId()) {
+                case 1:
+                    response.sendRedirect("admin/manage_users.jsp");
+                    break;
+                case 2:
+                    response.sendRedirect("manager/manage_cars.jsp");
+                    break;
+                case 3:
+                    response.sendRedirect("staff/manage_orders.jsp");
+                    break;
+                case 4:
+                    response.sendRedirect("driver/schedule.jsp");
+                    break;
+                default:
+                    response.sendRedirect("index.jsp"); // Customer về trang chủ
+                    break;
+            }
+        } else {
+            // Đăng nhập thất bại -> Trả về thông báo lỗi
+            request.setAttribute("error", "Tên đăng nhập hoặc mật khẩu không đúng!");
+            request.getRequestDispatcher("login.jsp").forward(request, response);
+        }
     }
 
     /** 

@@ -4,49 +4,66 @@
  */
 package dal;
 
-import java.sql.*;
-import java.util.*;
 import model.User;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
-/**
- *
- * @author ADMIN
- */
 public class UserDAO extends DBContext {
+
+    // Hàm kiểm tra Đăng nhập
     public User login(String username, String password) {
-
-        String sql = "SELECT * FROM Users WHERE Username=? AND Password=?";
-
+        String sql = "SELECT * FROM Users WHERE username = ? AND password = ?";
         try {
-
-            PreparedStatement ps = connection.prepareStatement(sql);
-
-            ps.setString(1, username);
-            ps.setString(2, password);
-
-            ResultSet rs = ps.executeQuery();
-
+            PreparedStatement st = connection.prepareStatement(sql);
+            st.setString(1, username);
+            st.setString(2, password); // Thực tế nên dùng MD5/SHA để mã hóa password
+            ResultSet rs = st.executeQuery();
+            
             if (rs.next()) {
-
-                return new User(
-                        rs.getInt("UserID"),
-                        rs.getString("Username"),
-                        rs.getString("Password"),
-                        rs.getString("FullName"),
-                        rs.getString("Phone"),
-                        rs.getString("Email"),
-                        rs.getInt("RoleID")
-                       
-                );
-
+                User u = new User();
+                u.setId(rs.getInt("id"));
+                u.setUsername(rs.getString("username"));
+                u.setFullname(rs.getString("fullname"));
+                u.setPhone(rs.getString("phone"));
+                u.setRoleId(rs.getInt("role_id")); // 1: Admin, 2: Manager, 3: Staff, 4: Driver, 5: Customer
+                return u;
             }
-
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (SQLException e) {
+            System.out.println("Lỗi hàm login: " + e.getMessage());
         }
-
-        return null;
+        return null; // Đăng nhập thất bại
     }
 
+    // Hàm Đăng ký tài khoản mới (Mặc định role_id = 5 cho Customer)
+    public boolean register(User user) {
+        String sql = "INSERT INTO Users (username, password, fullname, phone, role_id) VALUES (?, ?, ?, ?, 5)";
+        try {
+            PreparedStatement st = connection.prepareStatement(sql);
+            st.setString(1, user.getUsername());
+            st.setString(2, user.getPassword());
+            st.setString(3, user.getFullname());
+            st.setString(4, user.getPhone());
+            
+            int rowsAffected = st.executeUpdate();
+            return rowsAffected > 0;
+        } catch (SQLException e) {
+            System.out.println("Lỗi hàm register: " + e.getMessage());
+        }
+        return false;
+    }
     
+    // Hàm kiểm tra username đã tồn tại chưa
+    public boolean checkUserExist(String username) {
+        String sql = "SELECT 1 FROM Users WHERE username = ?";
+        try {
+            PreparedStatement st = connection.prepareStatement(sql);
+            st.setString(1, username);
+            ResultSet rs = st.executeQuery();
+            return rs.next();
+        } catch (SQLException e) {
+            System.out.println("Lỗi hàm checkUserExist: " + e.getMessage());
+        }
+        return false;
+    }
 }

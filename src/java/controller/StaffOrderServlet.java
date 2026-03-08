@@ -5,20 +5,21 @@
 
 package controller;
 
-import dal.UserDAO;
+import dal.ContractDAO;
 import java.io.IOException;
 import java.io.PrintWriter;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import model.User;
 
 /**
  *
  * @author ADMIN
  */
-public class RegisterServlet extends HttpServlet {
+public class StaffOrderServlet extends HttpServlet {
    
     /** 
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code> methods.
@@ -35,10 +36,10 @@ public class RegisterServlet extends HttpServlet {
             out.println("<!DOCTYPE html>");
             out.println("<html>");
             out.println("<head>");
-            out.println("<title>Servlet RegisterServlet</title>");  
+            out.println("<title>Servlet StaffOrderServlet</title>");  
             out.println("</head>");
             out.println("<body>");
-            out.println("<h1>Servlet RegisterServlet at " + request.getContextPath () + "</h1>");
+            out.println("<h1>Servlet StaffOrderServlet at " + request.getContextPath () + "</h1>");
             out.println("</body>");
             out.println("</html>");
         }
@@ -68,35 +69,50 @@ public class RegisterServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
     throws ServletException, IOException {
-        request.setCharacterEncoding("UTF-8");
+        HttpSession session = request.getSession();
+        User staff = (User) session.getAttribute("user");
         
-        String fullname = request.getParameter("fullname");
-        String phone = request.getParameter("phone");
-        String username = request.getParameter("username");
-        String password = request.getParameter("password");
+        // Kiểm tra quyền hạn (chỉ Staff hoặc Admin mới được thao tác)
+        if (staff == null || (staff.getRoleId() != 3 && staff.getRoleId() != 1)) {
+            response.sendRedirect("../login.jsp");
+            return;
+        }
+
+        // Lấy ID hợp đồng và hành động nhân viên muốn thực hiện
+        String contractIdStr = request.getParameter("contractId");
+        String action = request.getParameter("action");
         
-        UserDAO dao = new UserDAO();
-        
-        // Kiểm tra trùng lặp username
-        if (dao.checkUserExist(username)) {
-            request.setAttribute("error", "Tên đăng nhập đã tồn tại! Vui lòng chọn tên khác.");
-            request.getRequestDispatcher("register.jsp").forward(request, response);
-        } else {
-            // Tạo object User mới (role mặc định là 5 - Customer được set trong DAO)
-            User newUser = new User();
-            newUser.setFullname(fullname);
-            newUser.setPhone(phone);
-            newUser.setUsername(username);
-            newUser.setPassword(password);
-            
-            if (dao.register(newUser)) {
-                request.setAttribute("success", "Đăng ký thành công! Vui lòng đăng nhập.");
-                request.getRequestDispatcher("login.jsp").forward(request, response);
-            } else {
-                request.setAttribute("error", "Có lỗi xảy ra trong quá trình đăng ký. Vui lòng thử lại!");
-                request.getRequestDispatcher("register.jsp").forward(request, response);
+        if (contractIdStr != null && action != null) {
+            int contractId = Integer.parseInt(contractIdStr);
+            String newStatus = "";
+
+            // Ánh xạ action từ giao diện thành Status trong Database
+            switch (action) {
+                case "APPROVE":
+                    newStatus = "APPROVED"; // Đã duyệt, chờ cọc
+                    break;
+                case "REJECT":
+                    newStatus = "REJECTED"; // Từ chối
+                    break;
+                case "DEPOSIT_RECEIVED":
+                    newStatus = "DEPOSITED"; // Đã nhận cọc
+                    break;
+                case "CAR_PICKED_UP":
+                    newStatus = "ACTIVE"; // Đang mượn xe
+                    break;
+                case "COMPLETED":
+                    newStatus = "COMPLETED"; // Đã trả xe và thanh toán
+                    break;
+            }
+
+            if (!newStatus.isEmpty()) {
+                ContractDAO dao = new ContractDAO();
+                dao.updateContractStatus(contractId, newStatus);
             }
         }
+        
+        // Cập nhật xong thì load lại trang quản lý đơn hàng
+        response.sendRedirect("staff/manage_orders.jsp");
     }
 
     /** 

@@ -1,6 +1,6 @@
 <%-- 
-    Document   : register
-    Created on : Mar 8, 2026, 8:16:03 PM
+    Document   : login
+    Created on : Mar 9, 2026, 2:38:26 AM
     Author     : ADMIN
 --%>
 
@@ -10,15 +10,16 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>Đăng Ký - CarRental</title>
+    <title>Đăng Nhập - CarRental</title>
     <link rel="stylesheet" href="css/style.css">
     <style>
-        .auth-container { max-width: 500px; margin: 3rem auto; background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .auth-container { max-width: 400px; margin: 4rem auto; background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
         .auth-container h2 { text-align: center; margin-bottom: 1.5rem; color: var(--primary-color); }
         .auth-container .form-group { margin-bottom: 1rem; }
         .auth-container input { width: 100%; box-sizing: border-box; }
         .error-msg { color: #e53935; font-size: 0.9rem; margin-bottom: 1rem; text-align: center; }
-        .success-msg { color: #28a745; font-size: 0.9rem; margin-bottom: 1rem; text-align: center; }
+        .auth-links { text-align: center; margin-top: 1rem; font-size: 0.9rem; }
+        .auth-links a { color: var(--primary-color); text-decoration: none; }
     </style>
 </head>
 <body>
@@ -27,41 +28,34 @@
         <nav>
             <ul>
                 <li><a href="index.jsp">Trang chủ</a></li>
-                <li><a href="login.jsp">Đăng nhập</a></li>
+                <li><a href="register.jsp">Đăng ký</a></li>
             </ul>
         </nav>
     </header>
 
     <div class="container">
         <div class="auth-container">
-            <h2>Đăng Ký Tài Khoản</h2>
+            <h2>Đăng Nhập</h2>
             
             <c:if test="${not empty requestScope.error}">
                 <div class="error-msg">${requestScope.error}</div>
             </c:if>
-            <c:if test="${not empty requestScope.success}">
-                <div class="success-msg">${requestScope.success}</div>
-            </c:if>
 
-            <form action="register" method="POST">
-                <div class="form-group">
-                    <label for="fullname">Họ và tên</label>
-                    <input type="text" id="fullname" name="fullname" required>
-                </div>
-                <div class="form-group">
-                    <label for="phone">Số điện thoại</label>
-                    <input type="tel" id="phone" name="phone" required>
-                </div>
+            <form action="login" method="POST">
                 <div class="form-group">
                     <label for="username">Tên đăng nhập</label>
-                    <input type="text" id="username" name="username" required>
+                    <input type="text" id="username" name="username" required placeholder="Nhập username...">
                 </div>
                 <div class="form-group">
                     <label for="password">Mật khẩu</label>
-                    <input type="password" id="password" name="password" required>
+                    <input type="password" id="password" name="password" required placeholder="Nhập mật khẩu...">
                 </div>
-                <button type="submit" class="btn btn-full">Đăng Ký</button>
+                <button type="submit" class="btn btn-full">Đăng Nhập</button>
             </form>
+            
+            <div class="auth-links">
+                Chưa có tài khoản? <a href="register.jsp">Đăng ký ngay</a>
+            </div>
         </div>
     </div>
 </body>

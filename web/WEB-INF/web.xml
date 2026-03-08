@@ -8,12 +8,59 @@
         <servlet-name>RegisterServlet</servlet-name>
         <servlet-class>controller.RegisterServlet</servlet-class>
     </servlet>
-    <servlet-mapping>
-        <servlet-name>CarListServlet</servlet-name>
-        <url-pattern>/CarListServlet</url-pattern>
-    </servlet-mapping>
+    <servlet>
+        <servlet-name>LoginServlet</servlet-name>
+        <servlet-class>controller.LoginServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>SearchCarServlet</servlet-name>
+        <servlet-class>controller.SearchCarServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>CreateContractServlet</servlet-name>
+        <servlet-class>controller.CreateContractServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>StaffOrderServlet</servlet-name>
+        <servlet-class>controller.StaffOrderServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>ManagerCarServlet</servlet-name>
+        <servlet-class>controller.ManagerCarServlet</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>DriverScheduleServlet</servlet-name>
+        <servlet-class>controller.DriverScheduleServlet</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>RegisterServlet</servlet-name>
         <url-pattern>/RegisterServlet</url-pattern>
     </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>LoginServlet</servlet-name>
+        <url-pattern>/LoginServlet</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>SearchCarServlet</servlet-name>
+        <url-pattern>/SearchCarServlet</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>CreateContractServlet</servlet-name>
+        <url-pattern>/CreateContractServlet</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>StaffOrderServlet</servlet-name>
+        <url-pattern>/StaffOrderServlet</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>ManagerCarServlet</servlet-name>
+        <url-pattern>/ManagerCarServlet</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>DriverScheduleServlet</servlet-name>
+        <url-pattern>/DriverScheduleServlet</url-pattern>
+    </servlet-mapping>
+    <welcome-file-list>
+        <welcome-file>index.jsp</welcome-file>
+    </welcome-file-list>
 </web-app>

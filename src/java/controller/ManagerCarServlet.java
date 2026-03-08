@@ -5,20 +5,23 @@
 
 package controller;
 
-import dal.UserDAO;
+import dal.CarDAO;
 import java.io.IOException;
 import java.io.PrintWriter;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
+import model.Car;
+import model.CarType;
 import model.User;
 
 /**
  *
  * @author ADMIN
  */
-public class RegisterServlet extends HttpServlet {
+public class ManagerCarServlet extends HttpServlet {
    
     /** 
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code> methods.
@@ -35,10 +38,10 @@ public class RegisterServlet extends HttpServlet {
             out.println("<!DOCTYPE html>");
             out.println("<html>");
             out.println("<head>");
-            out.println("<title>Servlet RegisterServlet</title>");  
+            out.println("<title>Servlet ManagerCarServlet</title>");  
             out.println("</head>");
             out.println("<body>");
-            out.println("<h1>Servlet RegisterServlet at " + request.getContextPath () + "</h1>");
+            out.println("<h1>Servlet ManagerCarServlet at " + request.getContextPath () + "</h1>");
             out.println("</body>");
             out.println("</html>");
         }
@@ -55,7 +58,24 @@ public class RegisterServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
     throws ServletException, IOException {
-        processRequest(request, response);
+        HttpSession session = request.getSession();
+        User manager = (User) session.getAttribute("user");
+        if (manager == null || manager.getRoleId() != 2) {
+            response.sendRedirect("login.jsp");
+            return;
+        }
+
+        String action = request.getParameter("action");
+        String carIdStr = request.getParameter("id");
+
+        if ("delete".equals(action) && carIdStr != null) {
+            int carId = Integer.parseInt(carIdStr);
+            CarDAO dao = new CarDAO();
+            // Hàm deleteCar cần được định nghĩa thêm trong CarDAO
+            dao.deleteCar(carId); 
+        }
+        
+        response.sendRedirect("manager/manage_cars.jsp");
     } 
 
     /** 
@@ -70,33 +90,37 @@ public class RegisterServlet extends HttpServlet {
     throws ServletException, IOException {
         request.setCharacterEncoding("UTF-8");
         
-        String fullname = request.getParameter("fullname");
-        String phone = request.getParameter("phone");
-        String username = request.getParameter("username");
-        String password = request.getParameter("password");
+        String action = request.getParameter("action");
         
-        UserDAO dao = new UserDAO();
+        String name = request.getParameter("name");
+        String licensePlate = request.getParameter("licensePlate");
+        double price = Double.parseDouble(request.getParameter("price"));
+        int typeId = Integer.parseInt(request.getParameter("typeId")); // ID loại xe (4, 5, 7 chỗ)
+        String status = request.getParameter("status");
+
+        Car car = new Car();
+        car.setName(name);
+        car.setLicensePlate(licensePlate);
+        car.setPricePerDay(price);
+        car.setStatus(status);
         
-        // Kiểm tra trùng lặp username
-        if (dao.checkUserExist(username)) {
-            request.setAttribute("error", "Tên đăng nhập đã tồn tại! Vui lòng chọn tên khác.");
-            request.getRequestDispatcher("register.jsp").forward(request, response);
-        } else {
-            // Tạo object User mới (role mặc định là 5 - Customer được set trong DAO)
-            User newUser = new User();
-            newUser.setFullname(fullname);
-            newUser.setPhone(phone);
-            newUser.setUsername(username);
-            newUser.setPassword(password);
-            
-            if (dao.register(newUser)) {
-                request.setAttribute("success", "Đăng ký thành công! Vui lòng đăng nhập.");
-                request.getRequestDispatcher("login.jsp").forward(request, response);
-            } else {
-                request.setAttribute("error", "Có lỗi xảy ra trong quá trình đăng ký. Vui lòng thử lại!");
-                request.getRequestDispatcher("register.jsp").forward(request, response);
-            }
+        CarType type = new CarType();
+        type.setId(typeId);
+        car.setCarType(type);
+
+        CarDAO dao = new CarDAO();
+
+        if ("add".equals(action)) {
+            // Hàm insertCar cần được định nghĩa trong CarDAO
+            dao.insertCar(car);
+        } else if ("update".equals(action)) {
+            int id = Integer.parseInt(request.getParameter("id"));
+            car.setId(id);
+            // Hàm updateCar cần được định nghĩa trong CarDAO
+            dao.updateCar(car);
         }
+
+        response.sendRedirect("manager/manage_cars.jsp");
     }
 
     /** 

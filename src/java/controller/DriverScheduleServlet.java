@@ -5,20 +5,21 @@
 
 package controller;
 
-import dal.UserDAO;
+import dal.ContractDAO;
 import java.io.IOException;
 import java.io.PrintWriter;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import model.User;
 
 /**
  *
  * @author ADMIN
  */
-public class RegisterServlet extends HttpServlet {
+public class DriverScheduleServlet extends HttpServlet {
    
     /** 
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code> methods.
@@ -35,10 +36,10 @@ public class RegisterServlet extends HttpServlet {
             out.println("<!DOCTYPE html>");
             out.println("<html>");
             out.println("<head>");
-            out.println("<title>Servlet RegisterServlet</title>");  
+            out.println("<title>Servlet DriverScheduleServlet</title>");  
             out.println("</head>");
             out.println("<body>");
-            out.println("<h1>Servlet RegisterServlet at " + request.getContextPath () + "</h1>");
+            out.println("<h1>Servlet DriverScheduleServlet at " + request.getContextPath () + "</h1>");
             out.println("</body>");
             out.println("</html>");
         }
@@ -68,35 +69,35 @@ public class RegisterServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
     throws ServletException, IOException {
-        request.setCharacterEncoding("UTF-8");
+        HttpSession session = request.getSession();
+        User driver = (User) session.getAttribute("user");
         
-        String fullname = request.getParameter("fullname");
-        String phone = request.getParameter("phone");
-        String username = request.getParameter("username");
-        String password = request.getParameter("password");
-        
-        UserDAO dao = new UserDAO();
-        
-        // Kiểm tra trùng lặp username
-        if (dao.checkUserExist(username)) {
-            request.setAttribute("error", "Tên đăng nhập đã tồn tại! Vui lòng chọn tên khác.");
-            request.getRequestDispatcher("register.jsp").forward(request, response);
-        } else {
-            // Tạo object User mới (role mặc định là 5 - Customer được set trong DAO)
-            User newUser = new User();
-            newUser.setFullname(fullname);
-            newUser.setPhone(phone);
-            newUser.setUsername(username);
-            newUser.setPassword(password);
-            
-            if (dao.register(newUser)) {
-                request.setAttribute("success", "Đăng ký thành công! Vui lòng đăng nhập.");
-                request.getRequestDispatcher("login.jsp").forward(request, response);
-            } else {
-                request.setAttribute("error", "Có lỗi xảy ra trong quá trình đăng ký. Vui lòng thử lại!");
-                request.getRequestDispatcher("register.jsp").forward(request, response);
+        // Kiểm tra quyền hạn: Chỉ user đã đăng nhập và có Role = 4 (Driver) mới được phép thực thi
+        if (driver == null || driver.getRoleId() != 4) {
+            response.sendRedirect("login.jsp");
+            return;
+        }
+
+        // Lấy thông tin từ form
+        String detailIdStr = request.getParameter("detailId");
+        String newStatus = request.getParameter("status"); // VD: "ACCEPTED" hoặc "COMPLETED"
+
+        if (detailIdStr != null && newStatus != null) {
+            try {
+                int detailId = Integer.parseInt(detailIdStr);
+                ContractDAO dao = new ContractDAO();
+                
+                // Cập nhật trạng thái công việc của tài xế trong bảng ContractDetails
+                // Lưu ý: Bạn cần viết thêm hàm updateDriverTaskStatus trong ContractDAO
+                dao.updateDriverTaskStatus(detailId, newStatus); 
+                
+            } catch (NumberFormatException e) {
+                System.out.println("Lỗi parse ID chi tiết hợp đồng: " + e.getMessage());
             }
         }
+        
+        // Hoàn tất thì load lại trang lịch trình
+        response.sendRedirect("driver/schedule.jsp");
     }
 
     /** 
